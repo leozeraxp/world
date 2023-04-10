@@ -9,7 +9,7 @@ public class RuntimeExceptionHandler implements ExceptionMapper<RuntimeException
     @Override
     public Response toResponse(RuntimeException ex) {
         return Response.status(Response.Status.BAD_REQUEST)
-                .entity(ex.getMessage())
+                .entity(ex.getLocalizedMessage())
                 .build();
     }
 }

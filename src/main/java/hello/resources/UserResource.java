@@ -1,8 +1,8 @@
-package hello.api.controller;
+package hello.resources;
 
-import hello.api.dto.DtoUsuario;
+import hello.model.dto.DtoUsuario;
 import hello.model.entity.Usuario;
-import hello.service.impl.UsuarioServiceImpl;
+import hello.service.UsuarioService;
 import hello.util.ValidarCpf;
 
 import javax.inject.Inject;
@@ -13,28 +13,21 @@ import javax.ws.rs.core.Response;
 import java.util.List;
 
 @Path("/usuario")
+@Consumes(MediaType.APPLICATION_JSON)
+@Produces(MediaType.APPLICATION_JSON)
 public class UserResource {
 
     @Inject
-    private UsuarioServiceImpl usuarioService;
+    private UsuarioService usuarioService;
 
     @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
     public Response create(@Valid DtoUsuario dtoUsuario){
-        Usuario usuario = Usuario.builder()
-                .cpf(dtoUsuario.getCpf())
-                .nome(dtoUsuario.getNome())
-                .anoNascimento(dtoUsuario.getAnoNascimento())
-                .build();
-
-        usuarioService.create(usuario);
+        Usuario usuario = usuarioService.create(dtoUsuario);
 
         return Response.status(Response.Status.CREATED).entity(usuario).build();
     }
 
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}")
     public Response get(@PathParam("id") Long id){
         Usuario usuario = usuarioService.get(id);
@@ -43,7 +36,6 @@ public class UserResource {
     }
 
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
     @Path("/listar")
     public Response list(){
         List<Usuario> usuarios = usuarioService.list();
@@ -51,30 +43,20 @@ public class UserResource {
         return Response.status(Response.Status.OK).entity(usuarios).build();
     }
 
-    @POST
+    @PUT
     @Path("/atualizar")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
     public Response update(DtoUsuario dtoUsuario){
-        Usuario usuario = Usuario.builder()
-                .id(dtoUsuario.getId())
-                .cpf(dtoUsuario.getCpf())
-                .nome(dtoUsuario.getNome())
-                .anoNascimento(dtoUsuario.getAnoNascimento())
-                .build();
-
-        usuarioService.update(usuario);
+        Usuario usuario = usuarioService.update(dtoUsuario);
 
         return Response.status(Response.Status.CREATED).entity(usuario).build();
     }
 
     @GET
     @Path("/teste")
-    @Produces(MediaType.APPLICATION_JSON)
     public Response teste(){
         ValidarCpf validarCpf = new ValidarCpf();
 
-        validarCpf.executar("");
+        validarCpf.executar("53240390043");
         return Response.status(Response.Status.OK).entity("funcionou?").build();
     }
 }

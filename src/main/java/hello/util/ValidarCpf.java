@@ -2,65 +2,50 @@ package hello.util;
 
 import hello.exceptions.RegraNegocioException;
 
+import java.util.InputMismatchException;
+
 public class ValidarCpf {
 
     public void executar(String cpf){
-        isCPF(cpf);
-        char dig10 = calcularPrimeiroDigitoVerificadorCpf(cpf);
-        calcularSegundoDigitoVerificadorCpf(cpf,dig10);
-    }
+        boolean valido = isCpf(cpf);
 
-    private void isCPF(String cpf) {
-        if (cpf.equals("00000000000") ||
-                cpf.equals("11111111111") ||
-                cpf.equals("22222222222") ||
-                cpf.equals("33333333333") ||
-                cpf.equals("44444444444") ||
-                cpf.equals("55555555555") ||
-                cpf.equals("66666666666") ||
-                cpf.equals("77777777777") ||
-                cpf.equals("88888888888") ||
-                cpf.equals("99999999999") ||
-                cpf.length() != 11) {
+        if(!valido){
             throw new RegraNegocioException("CPF_INVALIDO");
         }
     }
 
-    public char calcularPrimeiroDigitoVerificadorCpf(String cpf) {
-        int sm = 0;
-        int peso = 10;
+    public boolean isCpf(String cpf) {
+        if (cpf == null || cpf.length() != 11 || !cpf.matches("\\d{11}")) {
+            return false;
+        }
+
+        int[] digits = cpf.chars().map(Character::getNumericValue).toArray();
+        int sum = 0;
+
         for (int i = 0; i < 9; i++) {
-            int num = Character.getNumericValue(cpf.charAt(i));
-            sm += num * peso;
-            peso--;
-        }
-        int r = 11 - (sm % 11);
-        char dig10;
-        if (r == 10 || r == 11) {
-            return dig10 = '0';
-        } else {
-            return dig10 = (char) (r + '0');
-        }
-    }
-
-    public void calcularSegundoDigitoVerificadorCpf(String cpf, char dig10) {
-        int sm = 0;
-        int peso = 11;
-        for (int i = 0; i < 10; i++) {
-            int num = Character.getNumericValue(cpf.charAt(i));
-            sm += num * peso;
-            peso--;
-        }
-        int r = 11 - (sm % 11);
-        char dig11;
-        if (r == 10 || r == 11) {
-            dig11 = '0';
-        } else {
-            dig11 = (char) (r + '0');
+            sum += digits[i] * (10 - i);
         }
 
-        if (dig10 != cpf.charAt(9) && dig11 != cpf.charAt(10)) {
-            throw new RegraNegocioException("CPF inválido!");
+        int firstDigit = 11 - (sum % 11);
+
+        if (firstDigit > 9) {
+            firstDigit = 0;
         }
+
+        sum = 0;
+
+        for (int i = 0; i < 9; i++) {
+            sum += digits[i] * (11 - i);
+        }
+
+        sum += firstDigit * 2;
+
+        int secondDigit = 11 - (sum % 11);
+
+        if (secondDigit > 9) {
+            secondDigit = 0;
+        }
+
+        return firstDigit == digits[9] && secondDigit == digits[10];
     }
 }

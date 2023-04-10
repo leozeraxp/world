@@ -1,4 +1,4 @@
-package hello.model.repository;
+package hello.repository;
 
 import io.quarkus.hibernate.orm.panache.PanacheRepository;
 import hello.model.entity.Usuario;

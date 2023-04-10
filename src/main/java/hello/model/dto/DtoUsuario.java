@@ -1,4 +1,4 @@
-package hello.api.dto;
+package hello.model.dto;
 
 import io.quarkus.runtime.annotations.RegisterForReflection;
 import lombok.Getter;
