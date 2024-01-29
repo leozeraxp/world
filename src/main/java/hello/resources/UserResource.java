@@ -4,12 +4,14 @@ import hello.model.dto.DtoUsuario;
 import hello.model.entity.Usuario;
 import hello.service.UsuarioService;
 import hello.util.ValidarCpf;
+import net.sf.jasperreports.engine.JRException;
 
 import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.io.FileNotFoundException;
 import java.util.List;
 
 @Path("/usuario")
@@ -53,10 +55,16 @@ public class UserResource {
 
     @GET
     @Path("/teste")
-    public Response teste(){
-        ValidarCpf validarCpf = new ValidarCpf();
-
-        validarCpf.executar("53240390043");
+    public Response teste() throws JRException, FileNotFoundException {
+        usuarioService.gerarPdf();
         return Response.status(Response.Status.OK).entity("funcionou?").build();
+    }
+
+    @GET
+    @Path("/assinatura")
+    public Response testeAssinatura(){
+
+
+        return Response.status(Response.Status.OK).build();
     }
 }

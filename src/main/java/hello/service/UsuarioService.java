@@ -5,12 +5,19 @@ import hello.model.dto.DtoUsuario;
 import hello.model.entity.Usuario;
 import hello.repository.UsuarioRepository;
 import hello.util.ValidarCpf;
+import net.sf.jasperreports.engine.*;
+import net.sf.jasperreports.engine.export.JRPdfExporter;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.ws.rs.NotFoundException;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 @ApplicationScoped
@@ -27,7 +34,7 @@ public class UsuarioService {
                 .anoNascimento(dtoUsuario.getAnoNascimento())
                 .build();
 
-        validarCpf(usuario.getCpf());
+//        /validarCpf(usuario.getCpf());
 
         usuarioRepository.persistAndFlush(usuario);
         return usuario;
@@ -49,22 +56,12 @@ public class UsuarioService {
     }
     @Transactional
     public Usuario update(DtoUsuario dtoUsuario) {
-        Usuario usuario = Usuario.builder()
-                .id(dtoUsuario.getId())
-                .cpf(dtoUsuario.getCpf())
-                .nome(dtoUsuario.getNome())
-                .anoNascimento(dtoUsuario.getAnoNascimento())
-                .build();
+        Usuario usuario = usuarioRepository.findById(dtoUsuario.getId());
 
-        Usuario usuarioBancoDeDados = usuarioRepository.findById(usuario.getId());
+        usuario.setNome(dtoUsuario.getNome());
+        usuario.setAnoNascimento(dtoUsuario.getAnoNascimento());
 
-        usuarioBancoDeDados.setNome(usuario.getNome());
-        usuarioBancoDeDados.setCpf(usuario.getCpf());
-        usuarioBancoDeDados.setAnoNascimento(usuario.getAnoNascimento());
-
-        validarCpf(usuario.getCpf());
-
-        usuarioRepository.persistAndFlush(usuarioBancoDeDados);
+        usuarioRepository.persistAndFlush(usuario);
 
         return usuario;
     }
@@ -81,5 +78,34 @@ public class UsuarioService {
         if(usuarioRepository.cpfJaExiste(cpf)){
             throw new RegraNegocioException("ESTE_CPF_JA_ESTA_CADASTRADO");
         };
+    }
+
+    public void gerarPdf() throws JRException, FileNotFoundException {
+        JRDataSource dataSource = new JREmptyDataSource();
+
+        String jrxml = "C:\\Users\\leonardo.alves\\Documents\\GitHub\\world\\src\\main\\java\\hello\\relatorios\\teste.jrxml";
+
+        String jasper = JasperCompileManager.compileReportToFile(jrxml);
+
+        System.out.println(jasper);
+
+        Map<String, Object> parameter = new HashMap<>();
+        parameter.put("nome","Leonardo");
+        /*parametros.put("$F{cpf}","123456789");
+        parametros.put("$F{nascimento}", "30/08/1998");*/
+
+        JasperPrint jasperPrint = JasperFillManager
+                .fillReport(jasper, parameter, dataSource);
+
+        //JasperExportManager.exportReportToPdfFile(jasper, "C:\\Users\\leonardo.alves\\Documents\\GitHub\\world\\src\\main\\java\\hello\\relatorios\\teste.pdf");
+
+        OutputStream saida = new FileOutputStream("C:\\Users\\leonardo.alves\\Documents\\GitHub\\world\\src\\main\\java\\hello\\relatorios\\teste.pdf");
+
+
+        JRExporter exporter = new JRPdfExporter();
+        exporter.setParameter(JRExporterParameter.JASPER_PRINT, jasperPrint);
+        exporter.setParameter(JRExporterParameter.OUTPUT_STREAM, saida);
+        exporter.exportReport();
+
     }
 }
